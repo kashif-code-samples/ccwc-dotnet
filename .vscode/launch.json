@@ -1,0 +1,19 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "wc-cs",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/wc-cs/bin/Debug/net8.0/wc-cs",
+            "args": ["test.txt"],
+            "cwd": "${workspaceFolder}/wc-cs",
+            "console": "internalConsole",
+            "stopAtEntry": false
+        }
+    ],
+}
