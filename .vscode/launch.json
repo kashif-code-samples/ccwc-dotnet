@@ -10,7 +10,7 @@
             "request": "launch",
             "preLaunchTask": "build",
             "program": "${workspaceFolder}/wc-cs/bin/Debug/net8.0/wc-cs",
-            "args": ["test.txt"],
+            "args": ["-l", "test.txt"],
             "cwd": "${workspaceFolder}/wc-cs",
             "console": "internalConsole",
             "stopAtEntry": false
