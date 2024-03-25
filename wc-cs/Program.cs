@@ -15,6 +15,12 @@ class Program
             description: "print the newline counts",
             getDefaultValue: () => false);
         countLinesOption.AddAlias("-l");
+
+        var countWordsOption = new Option<bool>(
+            name: "--words",
+            description: "print the word counts",
+            getDefaultValue: () => false);
+        countWordsOption.AddAlias("-w");
         
         var fileArgument = new Argument<string>();
 
@@ -22,11 +28,12 @@ class Program
         {
             countBytesOption,
             countLinesOption,
+            countWordsOption,
             fileArgument
         };
 
         rootCommand.SetHandler(
-            (countBytes, countLines, fileArgumentValue) =>
+            (countBytes, countLines, countWords, fileArgumentValue) =>
             {
                 if (countBytes)
                 {
@@ -39,8 +46,14 @@ class Program
                     var lineCount = GetLineCount(fileArgumentValue);
                     Console.WriteLine($"{lineCount} {fileArgumentValue}");
                 }
+
+                if (countWords)
+                {
+                    var wordCount = GetWordCount(fileArgumentValue);
+                    Console.WriteLine($"{wordCount} {fileArgumentValue}");
+                }
             },
-            countBytesOption, countLinesOption, fileArgument);
+            countBytesOption, countLinesOption, countWordsOption, fileArgument);
 
         await rootCommand.InvokeAsync(args);
     }
@@ -60,7 +73,26 @@ class Program
         {
             lineCount++;
         }
+
         return lineCount;
+    }
+
+    static long GetWordCount(string filename)
+    {
+        var reader = new StreamReader(new FileStream(filename, FileMode.Open, FileAccess.Read));
+        
+        var wordCount = 0L;
+        while (reader.Peek() != -1)
+        {
+            var ch = (char) reader.Read();
+            var nextCh = (char) reader.Peek();
+            if (!char.IsWhiteSpace(ch) && char.IsWhiteSpace(nextCh))
+            {
+                wordCount++;
+            }
+        }
+
+        return wordCount;
     }
 }
 
