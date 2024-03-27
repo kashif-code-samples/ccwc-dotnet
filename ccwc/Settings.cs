@@ -38,12 +38,26 @@ public class SettingsBinder : BinderBase<Settings>
         _wordsOption = wordsOption;
     }
 
-    protected override Settings GetBoundValue(BindingContext bindingContext) =>
-        new Settings
+    protected override Settings GetBoundValue(BindingContext bindingContext)
+    {
+        var showBytes = bindingContext.ParseResult.GetValueForOption(_bytesOption);
+        var showChars = bindingContext.ParseResult.GetValueForOption(_charsOption);
+        var showLines = bindingContext.ParseResult.GetValueForOption(_linesOption);
+        var showWords = bindingContext.ParseResult.GetValueForOption(_wordsOption);
+
+        if (!showBytes && !showChars && !showLines && !showWords)
         {
-            ShowBytes = bindingContext.ParseResult.GetValueForOption(_bytesOption),
-            ShowChars = bindingContext.ParseResult.GetValueForOption(_charsOption),
-            ShowLines = bindingContext.ParseResult.GetValueForOption(_linesOption),
-            ShowWords = bindingContext.ParseResult.GetValueForOption(_wordsOption),
+            showLines = true;
+            showWords = true;
+            showBytes = true;
+        }
+
+        return new Settings
+        {
+            ShowBytes = showBytes,
+            ShowChars = showChars,
+            ShowLines = showLines,
+            ShowWords = showWords,
         };
+    }
 }

@@ -32,6 +32,7 @@ var maxLineLengthOption = new Option<bool>(
 wordsOption.AddAlias("-L");
 
 var fileArgument = new Argument<string>();
+fileArgument.SetDefaultValue(null);
 
 var rootCommand = new RootCommand
 {
