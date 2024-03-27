@@ -36,30 +36,29 @@ public class Counter(Settings settings)
     private WordCount CountBytesCharsAndLinesFast(Stream stream)
     {
         var buffer = new byte[BufferSize];
-        Span<byte> span = buffer;
 
         var wordCount = new WordCount();
 
-        var n = stream.Read(span);
-        while (n > 0)
+        var readBytes = stream.Read(buffer, 0, BufferSize);
+        while (readBytes > 0)
         {
-            wordCount.Bytes += (ulong)n;
+            wordCount.Bytes += (ulong)readBytes;
 
             if (_settings.ShowChars || _settings.ShowLines)
             {
-                var bytes = span[..n];
                 if (_settings.ShowChars)
                 {
-                    wordCount.Chars += (ulong)Encoding.UTF8.GetCharCount(bytes);
+                    wordCount.Chars += (ulong)GetDecoder().GetCharCount(buffer, 0, readBytes);
                 }
 
                 if (_settings.ShowLines)
                 {
-                    wordCount.Lines += (ulong)bytes.Count((byte)'\n');
+                    var bytes = buffer[..readBytes];
+                    wordCount.Lines += (ulong)bytes.Count(x => x == (byte)'\n');
                 }
             }
             
-            n = stream.Read(span);
+            readBytes = stream.Read(buffer, 0, BufferSize);
         }
 
         return wordCount;
@@ -67,30 +66,26 @@ public class Counter(Settings settings)
 
     private WordCount WordCountFromStreamSpecialized(Stream reader)
     {
-        var encoding = Encoding.UTF8;
-        var decoder = encoding.GetDecoder();
+        var decoder = GetDecoder();
 
         var buffer = new byte[BufferSize];        
-        Span<byte> span = buffer;
-
-        var maxCharCount = encoding.GetMaxCharCount(span.Length);
-        var charBuffer = new char[maxCharCount];
-        Span<char> charSpan = charBuffer;
+        var charBuffer = new char[BufferSize];
 
         var wordCount = new WordCount();
 
         var inWord = false;
 
-        var n = reader.Read(span);
-        var nc = decoder.GetChars(span[..n], charSpan, n <= 0);
-        while (nc > 0)
+        var readBytes = reader.Read(buffer, 0, BufferSize);
+        while (readBytes > 0)
         {
-            wordCount.Bytes += (ulong)n;
-            wordCount.Chars += (ulong)nc;
+            wordCount.Bytes += (ulong)readBytes;
 
-            for (var i = 0; i < nc; i++)
+            var readChars = decoder.GetChars(buffer, 0, readBytes, charBuffer, 0);
+            wordCount.Chars += (ulong)readChars;
+
+            for (var i = 0; i < readChars; i++)
             {
-                var ch = charSpan[i];
+                var ch = charBuffer[i];
                 if (_settings.ShowWords)
                 {
                     if (char.IsWhiteSpace(ch))
@@ -112,10 +107,14 @@ public class Counter(Settings settings)
                 }
             }
 
-            n = reader.Read(span);
-            nc = decoder.GetChars(span[..n], charSpan, n <= 0);
+            readBytes = reader.Read(buffer, 0, BufferSize);
         }
 
         return wordCount;
+    }
+
+    private Decoder GetDecoder()
+    {
+        return Encoding.UTF8.GetDecoder();
     }
 }

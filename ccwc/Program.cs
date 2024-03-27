@@ -11,7 +11,7 @@ var charsOption = new Option<bool>(
     name: "--chars",
     description: "print the character counts",
     getDefaultValue: () => false);
-bytesOption.AddAlias("-m");
+charsOption.AddAlias("-m");
 
 var linesOption = new Option<bool>(
     name: "--lines",
